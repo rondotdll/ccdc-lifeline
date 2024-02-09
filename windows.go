@@ -19,19 +19,13 @@ func RunningAsAdmin() bool {
 	currentProcess, _ := syscall.GetCurrentProcess()
 
 	err := syscall.OpenProcessToken(currentProcess, syscall.TOKEN_QUERY, &tokenHandle)
-	if err != nil {
-		fmt.Println("Error: ", err)
-		os.Exit(1)
-	}
+	handle(err)
 	defer syscall.CloseHandle(syscall.Handle(tokenHandle))
 
 	var elevation TOKEN_ELEVATION
 	var returnedLen uint32
 	err = syscall.GetTokenInformation(tokenHandle, TokenElevation, (*byte)(unsafe.Pointer(&elevation)), uint32(unsafe.Sizeof(elevation)), &returnedLen)
-	if err != nil {
-		fmt.Println("Error: ", err)
-		os.Exit(1)
-	}
+	handle(err)
 
 	return elevation.TokenIsElevated != 0
 }

@@ -155,7 +155,7 @@ func LinuxBroadcast(message string) error {
 
 // Broadcasts a message to all users (Windows) (who says we can't have some fun back with the red team?)
 func WindowsBroadcast(message string) error {
-	_, err := ExecPowerShell("msg * /server$env:COMPUTERNAME \"" + message + "\"")
+	_, err := ExecPowerShell("msg * /server:$env:COMPUTERNAME \"" + message + "\"")
 	handle(err)
 	return nil
 }
@@ -206,7 +206,7 @@ func WindowsFirstTimeSetup() {
 	if resp.StatusCode != 200 {
 		// if the repository returned 404, it's unreachable (either private or non-existent)
 		fmt.Println("Failed to read repository:")
-		fmt.Println("Status Code ", resp.StatusCode)
+		fmt.Println("Status Code", resp.StatusCode)
 		os.Exit(-1)
 	}
 
