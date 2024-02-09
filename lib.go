@@ -137,7 +137,7 @@ func ExportRsaPublicKeyAsPemStr(pubkey *rsa.PublicKey) string {
 	return string(pubBytes)
 }
 
-// Broadcasts a message to all users (who says we can't have some fun back with the red team?)
+// Broadcasts a message to all users via (Linux) (who says we can't have some fun back with the red team?)
 func LinuxBroadcast(message string) error {
 	cmd := exec.Command("wall", "-n")
 	stdinPipe, err := cmd.StdinPipe()
@@ -153,6 +153,7 @@ func LinuxBroadcast(message string) error {
 	return cmd.Run()
 }
 
+// Broadcasts a message to all users (Windows) (who says we can't have some fun back with the red team?)
 func WindowsBroadcast(message string) error {
 	_, err := ExecPowerShell("msg * /server$env:COMPUTERNAME \"" + message + "\"")
 	handle(err)
@@ -260,12 +261,12 @@ func WindowsFirstTimeSetup() {
 	fmt.Println("Exporting public key...")
 	// Export the RSA public key as a PEM string (readable format)
 	PEMObj := ExportRsaPublicKeyAsPemStr(&PrivateKey.PublicKey)
-	os.Stdout.WriteString(Green + PEMObj)
+	os.Stdout.WriteString(Green + PEMObj + Reset)
 
 	os.WriteFile("PEM_STRING.txt", []byte(PEMObj), 0644)
 
-	fmt.Println("\nSTORE THE ABOVE SOMEWHERE SAFE, YOU WILL NEED IT TO ACTIVATE THE FAILSAFE!")
-	fmt.Println("         ***** (INCLUDING THE HEADER AND FOOTER LINES) *****\n\n")
+	fmt.Println(Red, "\nSTORE THE ABOVE SOMEWHERE SAFE, YOU WILL NEED IT TO ACTIVATE THE FAILSAFE!")
+	fmt.Println("         ***** (INCLUDING THE HEADER AND FOOTER LINES) *****\n\n", Reset)
 	fmt.Println("Done.")
 	fmt.Println("Use Start-ScheduledTask -TaskName \"project-one\"\n or shutdown /r /f /t 0 to finalize install.")
 	os.Exit(0)
