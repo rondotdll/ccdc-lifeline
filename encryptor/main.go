@@ -75,8 +75,6 @@ func main() {
 		password, _ = reader.ReadString('\n')
 	}
 
-	println("Encrypting plaintext \"" + password + "\"")
-
 	// Reading multi-line PEM string from user input
 	fmt.Println(Yellow + "↓" + Reset + " Please enter your PEM string below (press enter when finished) " + Yellow + "↓" + Green)
 
