@@ -51,7 +51,7 @@ WantedBy=multi-user.target`
 	//Yellow   = "\033[33m"	// Unused colors
 	//Blue     = "\033[34m"	// Unused colors
 	//Purple   = "\033[35m"	// Unused colors
-	//Cyan     = "\033[36m"	// Unused colors
+	Cyan = "\033[36m" // Unused colors
 	//Gray     = "\033[37m" // Unused colors
 	White = "\033[97m"
 )

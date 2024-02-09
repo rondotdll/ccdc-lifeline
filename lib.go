@@ -19,6 +19,16 @@ import (
 	"strings"
 )
 
+// Windows Only (duh)
+// Function to run PowerShell command
+func ExecPowerShell(script string) (string, error) {
+	cmd := exec.Command("powershell", "-Command", script)
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	return out.String(), err
+}
+
 // Save our config struct to an encrypted binary file
 func DumpStructToFile(data any, filename string, key []byte) error {
 	// Encode the data using gob
@@ -128,7 +138,7 @@ func ExportRsaPublicKeyAsPemStr(pubkey *rsa.PublicKey) string {
 }
 
 // Broadcasts a message to all users (who says we can't have some fun back with the red team?)
-func broadcastMessage(message string) error {
+func LinuxBroadcast(message string) error {
 	cmd := exec.Command("wall", "-n")
 	stdinPipe, err := cmd.StdinPipe()
 	if err != nil {
@@ -143,14 +153,27 @@ func broadcastMessage(message string) error {
 	return cmd.Run()
 }
 
+func WindowsBroadcast(message string) error {
+	_, err := ExecPowerShell("msg * /server$env:COMPUTERNAME \"" + message + "\"")
+	handle(err)
+	return nil
+}
+
 // Basic error handler to satisfy the linter
 func handle(e error) {
 	if e != nil {
 		fmt.Println(Red + "PANIC: Something internal went wrong, this text should never be visible!!!")
+		fmt.Println(e)
 		fmt.Println(Reset, e)
 		os.Exit(-1)
 	}
 }
+
+/****************************************************
+#####################################################
+			WINDOWS FIRST TIME SETUP STUFF
+#####################################################
+ ****************************************************/
 
 // Create and store out windows config file
 func WindowsFirstTimeSetup() {
@@ -201,6 +224,7 @@ func WindowsFirstTimeSetup() {
 	resp, err = http.Get(ghUrl) // attempt to download the ACTIVATE file
 	defer resp.Body.Close()
 	handle(err)
+	// Make sure the ACTIVATE file doesn't exist
 	if resp.StatusCode != 404 {
 		fmt.Println(Red + "Misconfigured Repository." + Reset)
 		fmt.Println(Red+"Make sure there is no file called 'ACTIVATE'", resp.StatusCode, Reset)
@@ -211,15 +235,20 @@ func WindowsFirstTimeSetup() {
 	MasterConfig.Protector = *PrivateKey // dereference the pointer (low level memory manipulation crap)
 
 	fmt.Println("Generating config file...")
-	err = DumpStructToFile(MasterConfig, LinuxConfigLocation, MasterKey)
+	err = DumpStructToFile(MasterConfig, WindowsConfigLocation, MasterKey)
 	handle(err)
 
 	fmt.Println("Config file generated successfully.")
 	fmt.Println("Adding process to systemd...")
 
-	// Create the systemd service file
-	// This is necessary to ensure the failsafe keeps listening even if we reboot the system.
-	err = os.WriteFile("/etc/systemd/system/one.service", []byte(systemd_service), 0644)
+	// Set the application to run at startup
+	exePath, err := os.Executable()
+	handle(err)
+
+	taskName := "MyGoProgramTask"
+	createTaskScript := fmt.Sprintf(`schtasks /create /tn "project-one" /tr "%s" /sc onstart /ru "SYSTEM"`, taskName, exePath)
+
+	_, err = ExecPowerShell(createTaskScript)
 	handle(err)
 
 	fmt.Println("Copying binary to /usr/local/bin...")
@@ -245,9 +274,15 @@ func WindowsFirstTimeSetup() {
 	fmt.Println(Red + "\nSTORE THE ABOVE SOMEWHERE SAFE, YOU WILL NEED IT TO ACTIVATE THE FAILSAFE!" + Reset)
 	fmt.Println("         ***** (INCLUDING THE HEADER AND FOOTER LINES) *****\n\n")
 	fmt.Println("Done.")
-	fmt.Println("Use " + White + "sudo systemctl start one.service" + Reset + " or reboot to finalize install.")
+	fmt.Println("Use " + Cyan + "Start-ScheduledTask -TaskName \"MyGoProgramTask\"\n" + Reset + " or " + Cyan + "shutdown /r /f /t 0 to finalize install.")
 	os.Exit(0)
 }
+
+/****************************************************
+#####################################################
+			LINUX FIRST TIME SETUP STUFF
+#####################################################
+ ****************************************************/
 
 // Create and store out linux config file
 func LinuxFirstTimeSetup() {

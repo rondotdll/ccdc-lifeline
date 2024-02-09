@@ -1,14 +1,11 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -18,7 +15,7 @@ import (
 	"unsafe"
 )
 
-func isAdmin() bool {
+func RunningAsAdmin() bool {
 	var tokenHandle syscall.Token
 	currentProcess, _ := syscall.GetCurrentProcess()
 
@@ -43,7 +40,7 @@ func isAdmin() bool {
 func main() {
 
 	// Verify the program is being run as root
-	if isAdmin() {
+	if RunningAsAdmin() {
 		fmt.Println(Red + "Program started with insufficient permissions, please re-run as Administrator." + Reset)
 		os.Exit(10)
 	}
@@ -79,75 +76,37 @@ func main() {
 		// ALL CODE PAST THIS POINT SHOULD ONLY RUN
 		// IF THE ACTIVATE FILE WAS SUCCESSFULLY READ
 
-		// read all user accounts
-		file, err := os.Open("/etc/passwd")
-		handle(err)
-
-		var userPassPairs []string // store stdin passed to chpasswd command
-
 		// decrypt backup password from ACTIVATE file
-		decryptedBytes, err := rsa.DecryptOAEP(sha256.New(), rand.Reader, &MasterConfig.Protector, blob, nil)
+		DecryptedBytes, err := rsa.DecryptOAEP(sha256.New(), rand.Reader, &MasterConfig.Protector, blob, nil)
+		password := string(DecryptedBytes) // convert raw bytes to string
+
+		// Get all AD users
+		users, err := ExecPowerShell(`Get-ADUser -Filter * | Select-Object -ExpandProperty SamAccountName`)
 		handle(err)
 
-		passwd := string(decryptedBytes)
-
-		scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			line := scanner.Text()
-
-			// ignore comments
-			if strings.HasPrefix(line, "#") {
+		// Recursively change each user's password
+		for _, user := range strings.Split(users, "\n") {
+			user = strings.TrimSpace(user)
+			if user == "" {
 				continue
 			}
 
-			// Split the line into fields
-			fields := strings.Split(line, ":")
-			if len(fields) > 0 {
-				user := fields[0]
-
-				switch fields[6] {
-				case "/bin/bash", "/bin/sh", "/bin/zsh":
-					// Append user-password pair for chpasswd
-					userPassPairs = append(userPassPairs, fmt.Sprintf("%s:%s", user, passwd))
-					break
-				default:
-					continue
-				}
-			}
+			_, err = ExecPowerShell(`Set-ADAccountPassword -Identity "` + user + `" -NewPassword (ConvertTo-SecureString -AsPlainText "` + password + `" -Force)`)
+			handle(err)
 		}
 
-		if err := scanner.Err(); err != nil {
-			fmt.Println("Error reading /etc/passwd:", err)
-			return
-		}
-
-		// Run chpasswd to update passwords
-		// Join user-password pairs with newlines
-		input := strings.Join(userPassPairs, "\n")
-
-		// Run chpasswd command
-		cmd := exec.Command("chpasswd")
-		cmd.Stdin = bytes.NewBufferString(input)
-		if err := cmd.Run(); err != nil {
-			log.Fatalf("Failed to change passwords: %v", err)
-		} else {
-			log.Println("Passwords changed successfully")
-		}
-
-		// Cleanup (in case we need to re-deploy)
-		exec.Command("systemctl", "disable", "failsafe.service").Run()
-		exec.Command("rm", "-f", "/etc/failsafe/config.protected").Run()
+		handle(err)
 
 		// :trollskull:
-		broadcastMessage("You really thought you won, huh?")
+		WindowsBroadcast("You really thought you won, huh?")
 		go func() {
-			for {
-				broadcastMessage("Sorry, try again! :P")
+			for i := 0; i < 10; i++ {
+				WindowsBroadcast("Sorry, try again! :P")
 			}
 		}()
 		time.Sleep(2500 * time.Millisecond)
 
-		broadcastMessage(TrollFace)
+		WindowsBroadcast("In the digital night, where shadows blend,\nA band of blackhats met their end.\nWindows Server 2016, a fortress so grand,\nRepelled their efforts, they couldn't stand.\n\nLearn from this, your foiled scheme,\nNot every hack's a cyber dream.\nIn the game of codes, where you dared to play,\nThe server stood strong, you lost your way.\n\n- Shakespear (probably)")
 		// reboot to kick out any attackers
 		time.Sleep(500 * time.Millisecond)
 		exec.Command("reboot").Run()

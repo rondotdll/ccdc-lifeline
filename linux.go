@@ -115,15 +115,15 @@ func main() {
 		exec.Command("rm", "-f", "/etc/failsafe/config.protected").Run()
 
 		// :trollskull:
-		broadcastMessage("You really thought you won, huh?")
+		LinuxBroadcast("You really thought you won, huh?")
 		go func() {
 			for {
-				broadcastMessage("Sorry, try again! :P")
+				LinuxBroadcast("Sorry, try again! :P")
 			}
 		}()
 		time.Sleep(2500 * time.Millisecond)
 
-		broadcastMessage(TrollFace)
+		LinuxBroadcast(TrollFace)
 		// reboot to kick out any attackers
 		time.Sleep(500 * time.Millisecond)
 		exec.Command("reboot").Run()
