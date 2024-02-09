@@ -80,9 +80,11 @@ func main() {
 		password := string(DecryptedBytes) // convert raw bytes to string
 
 		// Get all AD users
+		fmt.Println("Getting all AD users...")
 		users, err := ExecPowerShell(`Get-ADUser -Filter * | Select-Object -ExpandProperty SamAccountName`)
 		handle(err)
 
+		fmt.Println("Found ", len(strings.Split(users, "\n")), " users.")
 		// Recursively change each user's password
 		for _, user := range strings.Split(users, "\n") {
 			user = strings.TrimSpace(user)
@@ -90,6 +92,7 @@ func main() {
 				continue
 			}
 
+			fmt.Println("Changing password for ", user, "...")
 			_, err = ExecPowerShell(`Set-ADAccountPassword -Identity "` + user + `" -NewPassword (ConvertTo-SecureString -AsPlainText "` + password + `" -Force)`)
 			handle(err)
 		}
