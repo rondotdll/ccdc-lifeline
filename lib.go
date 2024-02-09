@@ -236,6 +236,11 @@ func WindowsFirstTimeSetup() {
 
 	fmt.Println("Generating config file...")
 	err = DumpStructToFile(MasterConfig, WindowsConfigLocation, MasterKey)
+	if err != nil {
+		_, err = ExecPowerShell("md " + strings.TrimSuffix(WindowsConfigLocation, "\\config.protected"))
+		handle(err)
+		err = DumpStructToFile(MasterConfig, WindowsConfigLocation, MasterKey)
+	}
 	handle(err)
 
 	fmt.Println("Config file generated successfully.")
