@@ -114,6 +114,10 @@ func main() {
 			}
 		}()
 
+		// Cleanup (in case we need to re-deploy)
+		ExecPowerShell(`Unregister-ScheduledTask -TaskName "project-one" -Confirm:$false`) // remove binary from startup
+		ExecPowerShell(`del ` + WindowsConfigLocation)                                     // remove config file
+
 		// reboot to kick out any attackers
 		time.Sleep(500 * time.Millisecond)
 		WindowsBroadcast("Bye bye!")
