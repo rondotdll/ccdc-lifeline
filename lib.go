@@ -239,32 +239,20 @@ func WindowsFirstTimeSetup() {
 	handle(err)
 
 	fmt.Println("Config file generated successfully.")
-	fmt.Println("Adding process to systemd...")
 
-	// Set the application to run at startup
+	fmt.Println("Copying executable to C:\\Windows\\System32\\one.exe...")
+	// Copy the binary to /usr/local/bin so it can be run as a service
 	exePath, err := os.Executable()
 	handle(err)
+	ExecPowerShell("copy \"" + exePath + "\" C:\\Windows\\System32\\one.exe")
 
-	taskName := "MyGoProgramTask"
-	createTaskScript := fmt.Sprintf(`schtasks /create /tn "project-one" /tr "%s" /sc onstart /ru "SYSTEM"`, taskName, exePath)
+	fmt.Println("Scheduling startup task...")
 
-	_, err = ExecPowerShell(createTaskScript)
+	// Enable the failsafe task to run at startup
+	_, err = ExecPowerShell(`schtasks /create /tn "project-one" /tr "C:\Windows\System32\one.exe" /sc onstart /ru "SYSTEM" /F`)
 	handle(err)
 
-	fmt.Println("Copying binary to /usr/local/bin...")
-	// Copy the binary to /usr/local/bin so it can be run as a service
-	thisPath, _ := os.Executable()
-	exec.Command("cp", thisPath, "/usr/local/bin/failsafe").Run()
-	exec.Command("chmod", "+x", "/usr/local/bin/failsafe").Run()
-
-	fmt.Println("Enabling process...")
-	// Enable the failsafe service to run at boot
-	cmd := exec.Command("systemctl", "enable", "one.service")
-	err = cmd.Run()
-	handle(err)
-	output, _ := cmd.Output()
-	println(White + string(output))
-
+	fmt.Println("Exporting public key...")
 	// Export the RSA public key as a PEM string (readable format)
 	PEMObj := ExportRsaPublicKeyAsPemStr(&PrivateKey.PublicKey)
 	os.Stdout.WriteString(Green + PEMObj)
@@ -274,7 +262,7 @@ func WindowsFirstTimeSetup() {
 	fmt.Println(Red + "\nSTORE THE ABOVE SOMEWHERE SAFE, YOU WILL NEED IT TO ACTIVATE THE FAILSAFE!" + Reset)
 	fmt.Println("         ***** (INCLUDING THE HEADER AND FOOTER LINES) *****\n\n")
 	fmt.Println("Done.")
-	fmt.Println("Use " + Cyan + "Start-ScheduledTask -TaskName \"MyGoProgramTask\"\n" + Reset + " or " + Cyan + "shutdown /r /f /t 0 to finalize install.")
+	fmt.Println("Use " + Cyan + "Start-ScheduledTask -TaskName \"project-one\"\n" + Reset + " or " + Cyan + "shutdown /r /f /t 0 to finalize install.")
 	os.Exit(0)
 }
 
@@ -368,6 +356,7 @@ func LinuxFirstTimeSetup() {
 	output, _ := cmd.Output()
 	println(White + string(output))
 
+	fmt.Println("Exporting public key...")
 	// Export the RSA public key as a PEM string (readable format)
 	PEMObj := ExportRsaPublicKeyAsPemStr(&PrivateKey.PublicKey)
 	os.Stdout.WriteString(Green + PEMObj)
