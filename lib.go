@@ -68,7 +68,7 @@ func DumpStructToFile(data any, filename string, key []byte) error {
 }
 
 // Load our config to the "MasterConfig" struct from an encrypted binary file
-func LoadStructFromFile(data any, filename string) error {
+func LoadStructFromFile(data any, filename string, key []byte) error {
 	// Open the file
 	file, err := os.Open(filename)
 	if err != nil {
@@ -152,8 +152,8 @@ func handle(e error) {
 	}
 }
 
-// Create and store out config file
-func firstTimeSetup() {
+// Create and store out windows config file
+func WindowsFirstTimeSetup() {
 	var err error
 	var resp *http.Response
 	PrivateKey, _ := rsa.GenerateKey(rand.Reader, 2048) // returns pointer
@@ -211,7 +211,7 @@ func firstTimeSetup() {
 	MasterConfig.Protector = *PrivateKey // dereference the pointer (low level memory manipulation crap)
 
 	fmt.Println("Generating config file...")
-	err = DumpStructToFile(MasterConfig, "/etc/failsafe/config.protected")
+	err = DumpStructToFile(MasterConfig, LinuxConfigLocation, MasterKey)
 	handle(err)
 
 	fmt.Println("Config file generated successfully.")
@@ -219,7 +219,7 @@ func firstTimeSetup() {
 
 	// Create the systemd service file
 	// This is necessary to ensure the failsafe keeps listening even if we reboot the system.
-	err = os.WriteFile("/etc/systemd/system/failsafe.service", []byte(systemd_service), 0644)
+	err = os.WriteFile("/etc/systemd/system/one.service", []byte(systemd_service), 0644)
 	handle(err)
 
 	fmt.Println("Copying binary to /usr/local/bin...")
@@ -230,7 +230,7 @@ func firstTimeSetup() {
 
 	fmt.Println("Enabling process...")
 	// Enable the failsafe service to run at boot
-	cmd := exec.Command("systemctl", "enable", "failsafe.service")
+	cmd := exec.Command("systemctl", "enable", "one.service")
 	err = cmd.Run()
 	handle(err)
 	output, _ := cmd.Output()
@@ -245,6 +245,103 @@ func firstTimeSetup() {
 	fmt.Println(Red + "\nSTORE THE ABOVE SOMEWHERE SAFE, YOU WILL NEED IT TO ACTIVATE THE FAILSAFE!" + Reset)
 	fmt.Println("         ***** (INCLUDING THE HEADER AND FOOTER LINES) *****\n\n")
 	fmt.Println("Done.")
-	fmt.Println("Use " + White + "sudo systemctl start failsafe.service" + Reset + " or reboot to finalize install.")
+	fmt.Println("Use " + White + "sudo systemctl start one.service" + Reset + " or reboot to finalize install.")
+	os.Exit(0)
+}
+
+// Create and store out linux config file
+func LinuxFirstTimeSetup() {
+	var err error
+	var resp *http.Response
+	PrivateKey, _ := rsa.GenerateKey(rand.Reader, 2048) // returns pointer
+
+	ghUrl := "0"
+	ghUrl_confirm := "1"
+
+	// Basic input validation for the GitHub URL
+	for ghUrl != ghUrl_confirm {
+		fmt.Print("Enter the URL of the GitHub to search for backups: ")
+		fmt.Scanln(&ghUrl)
+		fmt.Print("Re-type GitHub URL: ")
+		fmt.Scanln(&ghUrl_confirm)
+		if ghUrl != ghUrl_confirm {
+			fmt.Println(Red + "URLs do not match, please try again." + Reset)
+		}
+	}
+
+	// Ensure the URL is in the correct format
+	ghUrl = "https://" + strings.TrimPrefix(strings.TrimPrefix(ghUrl, "http://"), "https://")
+
+	fmt.Println("Contacting repository...")
+	// Attempt to make a GET request to the repository
+	resp, err = http.Get(ghUrl)
+	_ = resp.Body.Close()
+	handle(err) // universal internal error handling (this should realistically never trigger)
+	if resp.StatusCode != 200 {
+		// if the repository returned 404, it's unreachable (either private or non-existent)
+		fmt.Println(Red + "Failed to read repository:" + Reset)
+		fmt.Println(Red+"Status Code", resp.StatusCode, Reset)
+		os.Exit(-1)
+	}
+
+	// Validate the repository doesn't already contain an "ACTIVATE" file
+	// this is useful in case we need to redeploy our failsafe,
+	// we can generate a brand-new config file and RSA key
+	fmt.Println("Validating repository...")
+
+	// Format the github repo url into the direct download link to the ACTIVATE file
+	temp := strings.Split(ghUrl, "github.com/")
+	temp = strings.Split(temp[1], "/")
+
+	ghUrl = "https://raw.githubusercontent.com/" + temp[0] + "/" + temp[1] + "/main/ACTIVATE"
+
+	resp, err = http.Get(ghUrl) // attempt to download the ACTIVATE file
+	defer resp.Body.Close()
+	handle(err)
+	if resp.StatusCode != 404 {
+		fmt.Println(Red + "Misconfigured Repository." + Reset)
+		fmt.Println(Red+"Make sure there is no file called 'ACTIVATE'", resp.StatusCode, Reset)
+		os.Exit(-1)
+	}
+
+	MasterConfig.RepoUrl = ghUrl
+	MasterConfig.Protector = *PrivateKey // dereference the pointer (low level memory manipulation crap)
+
+	fmt.Println("Generating config file...")
+	err = DumpStructToFile(MasterConfig, LinuxConfigLocation, MasterKey)
+	handle(err)
+
+	fmt.Println("Config file generated successfully.")
+	fmt.Println("Adding process to systemd...")
+
+	// Create the systemd service file
+	// This is necessary to ensure the failsafe keeps listening even if we reboot the system.
+	err = os.WriteFile("/etc/systemd/system/one.service", []byte(systemd_service), 0644)
+	handle(err)
+
+	fmt.Println("Copying binary to /usr/local/bin...")
+	// Copy the binary to /usr/local/bin so it can be run as a service
+	thisPath, _ := os.Executable()
+	exec.Command("cp", thisPath, "/usr/local/bin/failsafe").Run()
+	exec.Command("chmod", "+x", "/usr/local/bin/failsafe").Run()
+
+	fmt.Println("Enabling process...")
+	// Enable the failsafe service to run at boot
+	cmd := exec.Command("systemctl", "enable", "one.service")
+	err = cmd.Run()
+	handle(err)
+	output, _ := cmd.Output()
+	println(White + string(output))
+
+	// Export the RSA public key as a PEM string (readable format)
+	PEMObj := ExportRsaPublicKeyAsPemStr(&PrivateKey.PublicKey)
+	os.Stdout.WriteString(Green + PEMObj)
+
+	os.WriteFile("PEM_STRING.txt", []byte(PEMObj), 0644)
+
+	fmt.Println(Red + "\nSTORE THE ABOVE SOMEWHERE SAFE, YOU WILL NEED IT TO ACTIVATE THE FAILSAFE!" + Reset)
+	fmt.Println("         ***** (INCLUDING THE HEADER AND FOOTER LINES) *****\n\n")
+	fmt.Println("Done.")
+	fmt.Println("Use " + White + "sudo systemctl start one.service" + Reset + " or reboot to finalize install.")
 	os.Exit(0)
 }

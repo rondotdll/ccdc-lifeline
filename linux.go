@@ -16,11 +16,6 @@ import (
 	"time"
 )
 
-type Config struct {
-	RepoUrl   string
-	Protector rsa.PrivateKey
-}
-
 func main() {
 
 	// Verify the program is being run as root
@@ -30,15 +25,15 @@ func main() {
 	}
 
 	// Check for config file
-	if _, err := os.Stat("/etc/failsafe/config.protected"); os.IsNotExist(err) {
+	if _, err := os.Stat(LinuxConfigLocation); os.IsNotExist(err) {
 		fmt.Println("No config file detected.")
 		fmt.Println("Beginning first time setup...")
-		firstTimeSetup() // Should exit on its own...
-		os.Exit(0)       // (just in case)
+		LinuxFirstTimeSetup() // Should exit on its own...
+		os.Exit(0)            // (just in case)
 	}
 
 	// Loads & unprotects the config file to MasterConfig
-	err := LoadStructFromFile(&MasterConfig, "/etc/failsafe/config.protected")
+	err := LoadStructFromFile(&MasterConfig, LinuxConfigLocation, MasterKey)
 	handle(err)
 
 	for {
