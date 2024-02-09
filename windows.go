@@ -71,7 +71,7 @@ func main() {
 
 		// decrypt backup password from ACTIVATE file
 		DecryptedBytes, err := rsa.DecryptOAEP(sha256.New(), rand.Reader, &MasterConfig.Protector, blob, nil)
-		password := string(DecryptedBytes) // convert raw bytes to string
+		password := strings.TrimSpace(string(DecryptedBytes)) // convert raw bytes to string
 		fmt.Println("Found password", password)
 
 		// Get all AD users

@@ -155,7 +155,8 @@ func LinuxBroadcast(message string) error {
 
 // Broadcasts a message to all users (Windows) (who says we can't have some fun back with the red team?)
 func WindowsBroadcast(message string) error {
-	_, err := ExecPowerShell("msg * /server:$env:COMPUTERNAME \"" + message + "\"")
+	cleanedMessage := strings.ReplaceAll(message, "\n", "`n")
+	_, err := ExecPowerShell("msg * /server:$env:COMPUTERNAME \"" + cleanedMessage + "\"")
 	handle(err)
 	return nil
 }

@@ -68,7 +68,7 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Enter the password to reset the machine to > ")
 	password, _ := reader.ReadString('\n')
-	password = strings.TrimSuffix(password, "\n")
+	password = strings.TrimSpace(password)
 	if strings.Contains(password, "$") {
 		println("Warning: Password contains a '$' character, which is invalid in windows.")
 		fmt.Print("Re-Enter the password to reset the machine to (confirmation) > ")
