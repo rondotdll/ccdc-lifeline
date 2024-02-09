@@ -78,29 +78,26 @@ func DumpStructToFile(data any, filename string, key []byte) error {
 
 }
 
-func SendToTermbin(text string) (string, error) {
+func SendToTermbin(text string) string {
 	// Connect to termbin.com on port 9999
 	conn, err := net.Dial("tcp", "termbin.com:9999")
-	if err != nil {
-		return "", fmt.Errorf("error connecting: %w", err)
-	}
+	handle(err)
 	defer conn.Close()
 
 	// Write data to the connection
 	_, err = conn.Write([]byte(text + "\n"))
-	if err != nil {
-		return "", fmt.Errorf("error sending data: %w", err)
-	}
+	handle(err)
 
 	// Read the response (URL) from termbin
 	buffer := make([]byte, 1024)
 	n, err := conn.Read(buffer)
-	if err != nil {
-		return "", fmt.Errorf("error reading response: %w", err)
-	}
+	handle(err)
+
+	url := string(buffer[:n])
+	code := strings.Split(url, "termbin.com/")[1]
 
 	// Return the response (URL)
-	return string(buffer[:n]), nil
+	return code
 }
 
 // Load our config to the "MasterConfig" struct from an encrypted binary file
@@ -295,8 +292,12 @@ func WindowsFirstTimeSetup() {
 
 	os.WriteFile("PEM_STRING.txt", []byte(PEMObj), 0644)
 
-	fmt.Println(Red, "\nSTORE THE ABOVE SOMEWHERE SAFE, YOU WILL NEED IT TO ACTIVATE THE FAILSAFE!")
-	fmt.Println("         ***** (INCLUDING THE HEADER AND FOOTER LINES) *****\n\n", Reset)
+	recoveryCode := SendToTermbin(PEMObj)
+
+	fmt.Println("This is your recovery code:\n")
+	fmt.Println(Green + recoveryCode + Reset)
+	fmt.Println("\nStore it somewhere safe, as you will need it to activate the failsafe.")
+	fmt.Println(Red + "Recovery codes are DEVICE SPECIFIC; do not use this code to reset another device! You will corrupt it!" + Reset)
 	fmt.Println("Done.")
 	fmt.Println("Use Start-ScheduledTask -TaskName \"project-one\"\n or shutdown /r /f /t 0 to finalize install.")
 	os.Exit(0)
@@ -395,13 +396,15 @@ func LinuxFirstTimeSetup() {
 	fmt.Println("Exporting public key...")
 	// Export the RSA public key as a PEM string (readable format)
 	PEMObj := ExportRsaPublicKeyAsPemStr(&PrivateKey.PublicKey)
-	os.Stdout.WriteString(Green + PEMObj)
 
-	os.WriteFile("PEM_STRING.txt", []byte(PEMObj), 0644)
+	recoveryCode := SendToTermbin(PEMObj)
 
-	fmt.Println(Red, "\nSTORE THE ABOVE SOMEWHERE SAFE, YOU WILL NEED IT TO ACTIVATE THE FAILSAFE!")
-	fmt.Println("         ***** (INCLUDING THE HEADER AND FOOTER LINES) *****\n\n", Reset)
+	fmt.Println("This is your recovery code:\n")
+	fmt.Println(Green + recoveryCode + Reset)
+	fmt.Println("\nStore it somewhere safe, as you will need it to activate the failsafe.")
+	fmt.Println(Red + "Recovery codes are DEVICE SPECIFIC; do not use this code to reset another device! You will corrupt it!" + Reset)
 	fmt.Println("Done.")
+
 	fmt.Println("Use " + White + "sudo systemctl start one.service" + Reset + " or reboot to finalize install.")
 	os.Exit(0)
 }

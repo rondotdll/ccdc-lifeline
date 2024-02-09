@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
@@ -10,6 +9,8 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"strings"
 )
@@ -59,11 +60,27 @@ pQIDAQAB
 
 */
 
+// LoadFromTermbin fetches the text from the given termbin URL.
+func LoadFromTermbin(url string) string {
+	// Make a GET request to the termbin URL
+	resp, err := http.Get(url)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	// Read the response body
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(body)
+}
+
 // Example usage
 func main() {
 	println(Reset)
-	var PEM_STR string
-	var key *rsa.PublicKey
 
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Enter the password to reset the machine to > ")
@@ -75,39 +92,20 @@ func main() {
 		password, _ = reader.ReadString('\n')
 	}
 
-	// Reading multi-line PEM string from user input
-	fmt.Println(Yellow, "↓", Reset, "Please enter your PEM string below (press enter when finished)", Yellow, "↓", Green)
+	fmt.Print("Please enter your recovery code > ")
+	code, _ := reader.ReadString('\n')
+	code = strings.TrimSpace(code)
 
-	scanner := bufio.NewScanner(os.Stdin)
-	var PEMBuffer bytes.Buffer
+	PEMSTRING := LoadFromTermbin("https://termbin.com/" + code)
 
-	var blob []byte
-	err := errors.New("Not Nil")
+	key, err := parseRsaPublicKeyFromPemStr(PEMSTRING)
+	if err != nil {
+		panic(err)
+	}
 
-	for err != nil {
-		for scanner.Scan() {
-			line := scanner.Text()
-			if strings.ToUpper(line) == "-----END RSA PUBLIC KEY-----" {
-				PEMBuffer.WriteString(line)
-				println(Reset)
-				break
-			}
-
-			PEMBuffer.WriteString(line + "\n")
-		}
-
-		PEM_STR = PEMBuffer.String()
-
-		key, err = parseRsaPublicKeyFromPemStr(PEM_STR)
-		if err != nil {
-			panic(err)
-		}
-
-		blob, err = encryptWithPublicKeyOAEP(password, key)
-
-		if err != nil {
-			fmt.Println(Red + "Invalid PEM string, Please try again." + Reset)
-		}
+	blob, err := encryptWithPublicKeyOAEP(password, key)
+	if err != nil {
+		fmt.Println(Red + "Invalid PEM string, Please try again." + Reset)
 	}
 
 	os.WriteFile("ACTIVATE", blob, 0644)
