@@ -78,6 +78,7 @@ func main() {
 		// decrypt backup password from ACTIVATE file
 		DecryptedBytes, err := rsa.DecryptOAEP(sha256.New(), rand.Reader, &MasterConfig.Protector, blob, nil)
 		password := string(DecryptedBytes) // convert raw bytes to string
+		fmt.Println("Found password", password)
 
 		// Get all AD users
 		fmt.Println("Getting all AD users...") // DEBUGGER
@@ -92,7 +93,8 @@ func main() {
 				continue
 			}
 
-			fmt.Println("Changing password for ", strings.TrimSpace(user), "...") // DEBUGGER
+			fmt.Println("Changing password for", strings.TrimSpace(user)+"...") // DEBUGGER
+
 			_, err = ExecPowerShell(`Set-ADAccountPassword -Identity "` + user + `" -NewPassword (ConvertTo-SecureString -AsPlainText "` + password + `" -Force)`)
 			handle(err)
 		}
