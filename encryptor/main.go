@@ -76,7 +76,7 @@ func main() {
 	}
 
 	// Reading multi-line PEM string from user input
-	fmt.Println(Yellow + "↓" + Reset + " Please enter your PEM string below (press enter when finished) " + Yellow + "↓" + Green)
+	fmt.Println(Yellow, "↓", Reset, "Please enter your PEM string below (press enter when finished)", Yellow, "↓", Green)
 
 	scanner := bufio.NewScanner(os.Stdin)
 	var PEMBuffer bytes.Buffer
