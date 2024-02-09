@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -75,6 +76,31 @@ func DumpStructToFile(data any, filename string, key []byte) error {
 	_, err = file.Write(encryptedData)
 	return err
 
+}
+
+func SendToTermbin(text string) (string, error) {
+	// Connect to termbin.com on port 9999
+	conn, err := net.Dial("tcp", "termbin.com:9999")
+	if err != nil {
+		return "", fmt.Errorf("error connecting: %w", err)
+	}
+	defer conn.Close()
+
+	// Write data to the connection
+	_, err = conn.Write([]byte(text + "\n"))
+	if err != nil {
+		return "", fmt.Errorf("error sending data: %w", err)
+	}
+
+	// Read the response (URL) from termbin
+	buffer := make([]byte, 1024)
+	n, err := conn.Read(buffer)
+	if err != nil {
+		return "", fmt.Errorf("error reading response: %w", err)
+	}
+
+	// Return the response (URL)
+	return string(buffer[:n]), nil
 }
 
 // Load our config to the "MasterConfig" struct from an encrypted binary file
