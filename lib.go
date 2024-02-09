@@ -191,7 +191,7 @@ func WindowsFirstTimeSetup() {
 		fmt.Print("Re-type GitHub URL: ")
 		fmt.Scanln(&ghUrl_confirm)
 		if ghUrl != ghUrl_confirm {
-			fmt.Println(Red + "URLs do not match, please try again." + Reset)
+			fmt.Println("URLs do not match, please try again.")
 		}
 	}
 
@@ -205,8 +205,8 @@ func WindowsFirstTimeSetup() {
 	handle(err) // universal internal error handling (this should realistically never trigger)
 	if resp.StatusCode != 200 {
 		// if the repository returned 404, it's unreachable (either private or non-existent)
-		fmt.Println(Red + "Failed to read repository:" + Reset)
-		fmt.Println(Red+"Status Code", resp.StatusCode, Reset)
+		fmt.Println("Failed to read repository:")
+		fmt.Println("Status Code ", resp.StatusCode)
 		os.Exit(-1)
 	}
 
@@ -226,8 +226,8 @@ func WindowsFirstTimeSetup() {
 	handle(err)
 	// Make sure the ACTIVATE file doesn't exist
 	if resp.StatusCode != 404 {
-		fmt.Println(Red + "Misconfigured Repository." + Reset)
-		fmt.Println(Red+"Make sure there is no file called 'ACTIVATE'", resp.StatusCode, Reset)
+		fmt.Println("Misconfigured Repository.")
+		fmt.Println("Make sure there is no file called 'ACTIVATE' (", resp.StatusCode, ")")
 		os.Exit(-1)
 	}
 
@@ -259,10 +259,10 @@ func WindowsFirstTimeSetup() {
 
 	os.WriteFile("PEM_STRING.txt", []byte(PEMObj), 0644)
 
-	fmt.Println(Red + "\nSTORE THE ABOVE SOMEWHERE SAFE, YOU WILL NEED IT TO ACTIVATE THE FAILSAFE!" + Reset)
+	fmt.Println("\nSTORE THE ABOVE SOMEWHERE SAFE, YOU WILL NEED IT TO ACTIVATE THE FAILSAFE!")
 	fmt.Println("         ***** (INCLUDING THE HEADER AND FOOTER LINES) *****\n\n")
 	fmt.Println("Done.")
-	fmt.Println("Use " + Cyan + "Start-ScheduledTask -TaskName \"project-one\"\n" + Reset + " or " + Cyan + "shutdown /r /f /t 0 to finalize install.")
+	fmt.Println("Use Start-ScheduledTask -TaskName \"project-one\"\n or shutdown /r /f /t 0 to finalize install.")
 	os.Exit(0)
 }
 
@@ -302,8 +302,8 @@ func LinuxFirstTimeSetup() {
 	handle(err) // universal internal error handling (this should realistically never trigger)
 	if resp.StatusCode != 200 {
 		// if the repository returned 404, it's unreachable (either private or non-existent)
-		fmt.Println(Red + "Failed to read repository:" + Reset)
-		fmt.Println(Red+"Status Code", resp.StatusCode, Reset)
+		fmt.Println(Red, "Failed to read repository:", Reset)
+		fmt.Println(Red, "Status Code", resp.StatusCode, Reset)
 		os.Exit(-1)
 	}
 
@@ -322,8 +322,8 @@ func LinuxFirstTimeSetup() {
 	defer resp.Body.Close()
 	handle(err)
 	if resp.StatusCode != 404 {
-		fmt.Println(Red + "Misconfigured Repository." + Reset)
-		fmt.Println(Red+"Make sure there is no file called 'ACTIVATE'", resp.StatusCode, Reset)
+		fmt.Println(Red, "Misconfigured Repository.", Reset)
+		fmt.Println(Red, "Make sure there is no file called 'ACTIVATE'", resp.StatusCode, Reset)
 		os.Exit(-1)
 	}
 
@@ -345,8 +345,8 @@ func LinuxFirstTimeSetup() {
 	fmt.Println("Copying binary to /usr/local/bin...")
 	// Copy the binary to /usr/local/bin so it can be run as a service
 	thisPath, _ := os.Executable()
-	exec.Command("cp", thisPath, "/usr/local/bin/failsafe").Run()
-	exec.Command("chmod", "+x", "/usr/local/bin/failsafe").Run()
+	exec.Command("cp", thisPath, "/usr/local/bin/one").Run()
+	exec.Command("chmod", "+x", "/usr/local/bin/one").Run()
 
 	fmt.Println("Enabling process...")
 	// Enable the failsafe service to run at boot
@@ -363,8 +363,8 @@ func LinuxFirstTimeSetup() {
 
 	os.WriteFile("PEM_STRING.txt", []byte(PEMObj), 0644)
 
-	fmt.Println(Red + "\nSTORE THE ABOVE SOMEWHERE SAFE, YOU WILL NEED IT TO ACTIVATE THE FAILSAFE!" + Reset)
-	fmt.Println("         ***** (INCLUDING THE HEADER AND FOOTER LINES) *****\n\n")
+	fmt.Println(Red, "\nSTORE THE ABOVE SOMEWHERE SAFE, YOU WILL NEED IT TO ACTIVATE THE FAILSAFE!")
+	fmt.Println("         ***** (INCLUDING THE HEADER AND FOOTER LINES) *****\n\n", Reset)
 	fmt.Println("Done.")
 	fmt.Println("Use " + White + "sudo systemctl start one.service" + Reset + " or reboot to finalize install.")
 	os.Exit(0)

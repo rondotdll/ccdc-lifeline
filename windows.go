@@ -40,8 +40,8 @@ func RunningAsAdmin() bool {
 func main() {
 
 	// Verify the program is being run as root
-	if RunningAsAdmin() {
-		fmt.Println(Red + "Program started with insufficient permissions, please re-run as Administrator." + Reset)
+	if !RunningAsAdmin() {
+		fmt.Println("Program started with insufficient permissions, please re-run as Administrator.")
 		os.Exit(10)
 	}
 
@@ -68,7 +68,7 @@ func main() {
 
 		blob, err := io.ReadAll(resp.Body)
 		if err != nil {
-			fmt.Println(Red+"Error reading response body:", err)
+			fmt.Println("Error reading response body:", err)
 			return
 		}
 		resp.Body.Close()

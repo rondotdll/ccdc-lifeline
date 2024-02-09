@@ -32,12 +32,12 @@ Description=Lockout FailSafe
 After=network.target
 
 [Service]
-ExecStart=/usr/local/bin/failsafe
+ExecStart=/usr/local/bin/one
 User=root
 Restart=on-failure
 RestartPreventExitStatus=10
-StandardOutput=/var/log/failsafe.log
-StandardError=/var/log/failsafe.log
+StandardOutput=/var/log/one.log
+StandardError=/var/log/one.log
 Type=simple
 
 [Install]
