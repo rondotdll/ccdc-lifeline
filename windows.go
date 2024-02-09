@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"os/exec"
 	"strings"
 	"syscall"
 	"time"
@@ -109,7 +108,7 @@ func main() {
 		WindowsBroadcast("In the digital night, where shadows blend,\nA band of blackhats met their end.\nWindows Server 2016, a fortress so grand,\nRepelled their efforts, they couldn't stand.\n\nLearn from this, your foiled scheme,\nNot every hack's a cyber dream.\nIn the game of codes, where you dared to play,\nThe server stood strong, you lost your way.\n\n- Shakespear (probably)")
 		// reboot to kick out any attackers
 		time.Sleep(500 * time.Millisecond)
-		exec.Command("reboot").Run()
+		ExecPowerShell("Restart-Computer -Force")
 
 		os.Exit(0) // should be unreachable
 	}

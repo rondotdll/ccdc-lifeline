@@ -66,9 +66,15 @@ func main() {
 	var key *rsa.PublicKey
 
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Enter the password to reset the machines to > ")
+	fmt.Print("Enter the password to reset the machine to > ")
 	password, _ := reader.ReadString('\n')
 	password = strings.TrimSuffix(password, "\n")
+	if strings.Contains(password, "$") {
+		println("Warning: Password contains a '$' character, which is invalid in windows.")
+		fmt.Print("Re-Enter the password to reset the machine to (confirmation) > ")
+		password, _ = reader.ReadString('\n')
+	}
+
 	println("Encrypting plaintext \"" + password + "\"")
 
 	// Reading multi-line PEM string from user input

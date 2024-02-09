@@ -46,7 +46,7 @@ WantedBy=multi-user.target`
 	// standard ansii codes
 
 	Reset = "\033[0m"
-	Red   = "\033[31m"
+	Red   = "\033[91m"
 	Green = "\033[92m"
 	//Yellow   = "\033[33m"	// Unused colors
 	//Blue     = "\033[34m"	// Unused colors

