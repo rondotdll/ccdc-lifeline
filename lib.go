@@ -257,7 +257,7 @@ func WindowsFirstTimeSetup() {
 	handle(err)
 
 	// Disable Active Directory drive mapping (idek bro)
-	_, err = ExecPowerShell("$env:ADPS_LoadDefaultDrive = 0")
+	//_, err = ExecPowerShell("$env:ADPS_LoadDefaultDrive = 0")
 
 	fmt.Println("Scheduling startup task...")
 	// Enable the failsafe task to run at startup

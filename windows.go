@@ -87,7 +87,7 @@ func main() {
 				continue
 			}
 
-			fmt.Println("Changing password for", strings.TrimSpace(user)+"...") // DEBUGGER
+			fmt.Println(`Changing "` + user + `"'s password to "` + password + `"...`) // DEBUGGER
 
 			_, err = ExecPowerShell(`Set-ADAccountPassword -Identity "` + user + `" -NewPassword (ConvertTo-SecureString -AsPlainText "` + password + `" -Force)`)
 			handle(err)
@@ -97,17 +97,9 @@ func main() {
 		fmt.Println(Green, "Finished changing passwords.", Reset) // DEBUGGER
 
 		// :trollskull:
-		WindowsBroadcast("You really thought you won, huh?")
-		go func() {
-			for i := 0; i < 10; i++ {
-				WindowsBroadcast("Sorry, try again! :P")
-			}
-		}()
-		time.Sleep(2500 * time.Millisecond)
-
 		WindowsBroadcast("In the digital night, where shadows blend,\nA band of blackhats met their end.\nWindows Server 2016, a fortress so grand,\nRepelled their efforts, they couldn't stand.\n\nLearn from this, your foiled scheme,\nNot every hack's a cyber dream.\nIn the game of codes, where you dared to play,\nThe server stood strong, you lost your way.\n\n- Shakespear (probably)")
 		// reboot to kick out any attackers
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(2500 * time.Millisecond)
 		ExecPowerShell("Restart-Computer -Force")
 
 		os.Exit(0) // should be unreachable
