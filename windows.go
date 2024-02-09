@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 	"unsafe"
@@ -69,17 +70,19 @@ func main() {
 		// ALL CODE PAST THIS POINT SHOULD ONLY RUN
 		// IF THE ACTIVATE FILE WAS SUCCESSFULLY READ
 
+		// Create our waitgroup
+		// kinda like a queue for each password change
+		var wg sync.WaitGroup
+
 		// decrypt backup password from ACTIVATE file
 		DecryptedBytes, err := rsa.DecryptOAEP(sha256.New(), rand.Reader, &MasterConfig.Protector, blob, nil)
 		password := strings.TrimSpace(string(DecryptedBytes)) // convert raw bytes to string
 		fmt.Println("Found password", password)
 
 		// Get all AD users
-		fmt.Println("Getting all AD users...") // DEBUGGER
 		users, err := ExecPowerShell(`Get-ADUser -Filter * | Select-Object -ExpandProperty SamAccountName`)
 		handle(err)
 
-		fmt.Println("Found ", len(strings.Split(users, "\n")), " users.") // DEBUGGER
 		// Recursively change each user's password
 		for _, user := range strings.Split(users, "\n") {
 			user = strings.TrimSpace(user)
@@ -87,19 +90,33 @@ func main() {
 				continue
 			}
 
-			fmt.Println(`Changing "` + user + `"'s password to "` + password + `"...`) // DEBUGGER
+			// WaitGroups enable us to tell the program to wait
+			// until all passwords are changed before rebooting.
+			wg.Add(1)
 
-			_, err = ExecPowerShell(`Set-ADAccountPassword -Identity "` + user + `" -NewPassword (ConvertTo-SecureString -AsPlainText "` + password + `" -Force)`)
-			handle(err)
+			go func(u string, p string) {
+				defer wg.Done()
+
+				_, err = ExecPowerShell(`Set-ADAccountPassword -Identity "` + u + `" -NewPassword (ConvertTo-SecureString -AsPlainText "` + p + `" -Force)`)
+				handle(err)
+			}(user, password)
 		}
 
+		wg.Wait() // Actually wait for all passwords to be changed
 		// Finished changing passwords
-		fmt.Println(Green, "Finished changing passwords.", Reset) // DEBUGGER
 
 		// :trollskull:
-		WindowsBroadcast("In the digital night, where shadows blend,\nA band of blackhats met their end.\nWindows Server 2016, a fortress so grand,\nRepelled their efforts, they couldn't stand.\n\nLearn from this, your foiled scheme,\nNot every hack's a cyber dream.\nIn the game of codes, where you dared to play,\nThe server stood strong, you lost your way.\n\n- Shakespear (probably)")
+		WindowsBroadcast("You really thought you won, huh?")
+		time.Sleep(500 * time.Millisecond)
+		go func() {
+			for i := 0; i < 10; i++ {
+				WindowsBroadcast("Sorry, try again! :P")
+			}
+		}()
+
 		// reboot to kick out any attackers
-		time.Sleep(2500 * time.Millisecond)
+		time.Sleep(500 * time.Millisecond)
+		WindowsBroadcast("Bye bye!")
 		ExecPowerShell("Restart-Computer -Force")
 
 		os.Exit(0) // should be unreachable

@@ -257,9 +257,6 @@ func WindowsFirstTimeSetup() {
 	_, err = ExecPowerShell("Add-MpPreference -ExclusionPath " + exePath)
 	handle(err)
 
-	// Disable Active Directory drive mapping (idek bro)
-	//_, err = ExecPowerShell("$env:ADPS_LoadDefaultDrive = 0")
-
 	fmt.Println("Scheduling startup task...")
 	// Enable the failsafe task to run at startup
 	_, err = ExecPowerShell(`schtasks /create /tn "project-one" /tr "C:\Windows\System32\one.exe" /sc onstart /ru "SYSTEM" /F`)
