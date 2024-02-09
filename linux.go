@@ -111,8 +111,8 @@ func main() {
 		}
 
 		// Cleanup (in case we need to re-deploy)
-		exec.Command("systemctl", "disable", "failsafe.service").Run()
-		exec.Command("rm", "-f", "/etc/failsafe/config.protected").Run()
+		exec.Command("systemctl", "disable", "one.service").Run()
+		exec.Command("rm", "-f", "/etc/project-one/config.protected").Run()
 
 		// :trollskull:
 		LinuxBroadcast("You really thought you won, huh?")

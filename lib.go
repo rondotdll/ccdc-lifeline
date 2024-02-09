@@ -64,7 +64,7 @@ func DumpStructToFile(data any, filename string, key []byte) error {
 	stream.CryptBlocks(encryptedData[aes.BlockSize:], paddedData)
 
 	// Open the file to write
-	os.Mkdir("/etc/failsafe", 0755)
+	os.Mkdir("/etc/project-one", 0755)
 	file, err := os.Create(filename)
 	if err != nil {
 		return err
@@ -297,7 +297,7 @@ func WindowsFirstTimeSetup() {
 	fmt.Println("This is your recovery code:\n")
 	fmt.Println(Green + recoveryCode + Reset)
 	fmt.Println("\nStore it somewhere safe, as you will need it to activate the failsafe.")
-	fmt.Println(Red + "Recovery codes are DEVICE SPECIFIC; do not use this code to reset another device! You will corrupt it!" + Reset)
+	fmt.Println(Red + "Recovery codes are DEVICE SPECIFIC\nDo not use this code to reset another device! You will corrupt it!" + Reset)
 	fmt.Println("Done.")
 	fmt.Println("Use Start-ScheduledTask -TaskName \"project-one\"\n or shutdown /r /f /t 0 to finalize install.")
 	os.Exit(0)
@@ -390,8 +390,6 @@ func LinuxFirstTimeSetup() {
 	cmd := exec.Command("systemctl", "enable", "one.service")
 	err = cmd.Run()
 	handle(err)
-	output, _ := cmd.Output()
-	println(White + string(output))
 
 	fmt.Println("Exporting public key...")
 	// Export the RSA public key as a PEM string (readable format)
@@ -402,7 +400,7 @@ func LinuxFirstTimeSetup() {
 	fmt.Println("This is your recovery code:\n")
 	fmt.Println(Green + recoveryCode + Reset)
 	fmt.Println("\nStore it somewhere safe, as you will need it to activate the failsafe.")
-	fmt.Println(Red + "Recovery codes are DEVICE SPECIFIC; do not use this code to reset another device! You will corrupt it!" + Reset)
+	fmt.Println(Red + "Recovery codes are DEVICE SPECIFIC\nDo not use this code to reset another device! You will corrupt it!" + Reset)
 	fmt.Println("Done.")
 
 	fmt.Println("Use " + White + "sudo systemctl start one.service" + Reset + " or reboot to finalize install.")
