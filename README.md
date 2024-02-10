@@ -5,9 +5,9 @@ Project One is an experimental repository that showcases a variety of functional
 ## Main Components
 **Encryptor:** A Go module that demonstrates encryption using RSA public keys. It includes functions for encrypting messages with OAEP padding and parsing RSA public keys from PEM strings. View Encryptor Code
 
-**Lib.go:** This file contains a collection of utility functions used across the project. It includes methods for executing PowerShell scripts, encrypting and decrypting data, handling files, and communicating over the network. View Lib.go Code
+**Lib.go:** This file contains a collection of utility functions used across the project. It includes methods for executing PowerShell scripts, encrypting and decrypting data, handling files, and communicating over the network. [View Lib.go Code](https://github.com/rondotdll/project-one/blob/main/lib.go)
 
-**Linux.go:** A Go script tailored for Linux systems, it includes functionalities for system configuration, user password management, and broadcasting messages. It ensures that the program runs with root permissions and performs a series of system checks and configurations during the first-time setup. View Linux.go Code
+**Linux.go:** A Go script tailored for Linux systems, it includes functionalities for system configuration, user password management, and broadcasting messages. It ensures that the program runs with root permissions and performs a series of system checks and configurations during the first-time setup. [View Linux.go Code](https://github.com/rondotdll/project-one/blob/main/linux.go)
 
 **Windows_ad.go:** This file is intended for Windows Active Directory configurations. (Content not provided in the current context)
 
