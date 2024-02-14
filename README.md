@@ -12,7 +12,7 @@ LifeLine is an experimental project tailored for use in the [CCDC](https://www.n
 ## Installation & Setup
 ### Windows
 #### THERE IS NO RELEASE FOR WINDOWS!
-This was intentional! Due to Windows Defender slowly becoming more capable at protecting our devices, by default it will automatically block most executables from doing anything in privilleged execution mode. Because of this, the auto-configuration mode requires a crap ton of extra firewall exclusions and rules that unnecessarily overcomplicate things.
+This was intentional! Due to Windows Defender slowly becoming more capable at actually protecting our devices, by default it will automatically block most executables from doing anything in privilleged execution mode. Because of this, the auto-configuration mode requires a crap ton of extra firewall exclusions and rules that unnecessarily overcomplicate things.
 
 #### Compiling from source:
 1. Make sure you have at least go 1.21 installed and configured properly (can be found [here](https://go.dev/doc/install)).  
