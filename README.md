@@ -19,9 +19,9 @@ This was intentional! Due to Windows Defender slowly becoming more capable at ac
 ```sh
 go version
 ```
-2. If you don't have git installed, you can [download this repo as a zip](https://github.com/rondotdll/project-one/archive/refs/heads/main.zip). Otherwise:
+2. If you don't have git installed, you can [download this repo as a zip](https://github.com/rondotdll/ccdc-lifeline/archive/refs/heads/main.zip). Otherwise:
 ```sh
-git clone https://github.com/rondotdll/project-one
+git clone https://github.com/rondotdll/ccdc-lifeline
 ```
 3. If you downloaded the zip, make sure to unzip the archive. Then cd into the root of the repo and compile:
 ```sh
@@ -31,7 +31,7 @@ go build windows.go var.go lib.go -o "lifeline.exe"
 
 ### Linux (Debian / Ubuntu)
 #### From Releases:
-1. Head over to the [Releases](https://github.com/rondotdll/project-one/releases) page and download the latest linux release
+1. Head over to the [Releases](https://github.com/rondotdll/ccdc-lifeline/releases) page and download the latest linux release
 2. Unzip the release file
 3. Make binaries executable
 ```sh
@@ -53,11 +53,11 @@ sudo snap install go --classic
 ```
 3. Clone this repository
 ```sh
-git clone https://github.com/rondotdll/project-one
+git clone https://github.com/rondotdll/ccdc-lifeline
 ```
 4. Cd into repo folder and compile
 ```sh
-cd project-one && go build linux.go var.go lib.go -o lifeline
+cd ccdc-lifeline && go build linux.go var.go lib.go -o lifeline
 ```
 5. Make binary executable and run setup **\*in sudo**
 ```sh
@@ -66,7 +66,7 @@ chmod +x lifeline && sudo lifeline
 
 ### Linux (Fedora / CentOS)
 #### From Releases:
-1. Head over to the [Releases](https://github.com/rondotdll/project-one/releases) page and download the latest linux release
+1. Head over to the [Releases](https://github.com/rondotdll/ccdc-lifeline/releases) page and download the latest linux release
 2. Unzip the release file
 3. Make binaries executable
 ```sh
