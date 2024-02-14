@@ -6,8 +6,8 @@ LifeLine is an experimental project, and is thus **VERY** insecure. It was not d
 LifeLine is an experimental project tailored for use in the [CCDC](https://www.nationalccdc.org/), and is designed to prevent a complete system lockout by running in the background waiting for a user to upload an activation file to a repository configured at setup. Upon detection of said activation file, LifeLine will recursively reset all user account passwords on Linux, Windows, and Active Directory to a user-provided string.
 
 * [Windows Installation](#windows)
-* [Linux Installation (Debian / Ubuntu)](#linux-debian-/-ubuntu)
-* [Linux Installation (Fedora / CentOS)](#linux-fedora-/-centos)
+* [Linux Installation (Debian / Ubuntu)](#linux-debian--ubuntu)
+* [Linux Installation (Fedora / CentOS)](#linux-fedora--centos)
 
 ## Installation & Setup
 ### Windows
