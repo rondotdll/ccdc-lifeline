@@ -1,4 +1,4 @@
-# !!!DO NOT USE LIFELINE IN A PROFESSIONAL ENVIRONMENT!!!
+# DO NOT DEPLOY IN A PROFESSIONAL ENVIRONMENT!!!
 LifeLine is an experimental project, and is thus **VERY** insecure. It was not designed to be deployed in a professional environment as an actual backup system, so don't do that. Thanks! :)
 
 # ccdc-lifeline <sup>experimental</sup>
