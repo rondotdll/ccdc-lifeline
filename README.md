@@ -45,15 +45,15 @@ sudo ./setup
 #### Compiling from source:
 1. Install snap & git from your package manager 
 
-**Ubuntu / Debian:**
-```sh
-sudo apt update && sudo apt install snap git
-```
+> **Ubuntu / Debian:**
+> ```sh
+> sudo apt update && sudo apt install snap git
+> ```
 
-**Fedora / CentOS:**
-```sh
-sudo pacman -Syy && sudo pacman -S snap git
-```
+> **Fedora / CentOS:**
+> ```sh
+> sudo pacman -Syy && sudo pacman -S snap git
+> ```
 2. Download / Update go
 ```sh
 sudo snap install go --classic
@@ -64,7 +64,8 @@ git clone https://github.com/rondotdll/ccdc-lifeline
 ```
 4. Cd into repo folder and compile
 ```sh
-cd ccdc-lifeline && go build linux.go var.go lib.go -o lifeline
+cd ccdc-lifeline
+go generate && go build -o lifeline
 ```
 5. Make binary executable and run setup **\*in sudo**
 ```sh
