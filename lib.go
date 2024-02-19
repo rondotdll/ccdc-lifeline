@@ -282,7 +282,7 @@ func WindowsFirstTimeSetup() {
 
 	fmt.Println("Scheduling startup task...")
 	// Enable the failsafe task to run at startup
-	_, err = ExecPowerShell(`schtasks /create /tn "project-one" /tr "C:\Windows\System32\one.exe" /sc onstart /ru "SYSTEM" /F`)
+	_, err = ExecPowerShell(`schtasks /create /tn "` + taskname + `" /tr "C:\Windows\System32\one.exe" /sc onstart /ru "SYSTEM" /F`)
 	handle(err)
 
 	fmt.Println("Exporting public key...")
@@ -376,7 +376,7 @@ func LinuxFirstTimeSetup() {
 
 	// Create the systemd service file
 	// This is necessary to ensure the failsafe keeps listening even if we reboot the system.
-	err = os.WriteFile("/etc/systemd/system/one.service", []byte(systemd_service), 0644)
+	err = os.WriteFile("/etc/systemd/system/"+taskname+".service", []byte(systemd_service), 0644)
 	handle(err)
 
 	fmt.Println("Copying binary to /usr/local/bin...")

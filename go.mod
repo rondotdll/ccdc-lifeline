@@ -1,3 +1,3 @@
-module project-one
+module lifeline
 
 go 1.21

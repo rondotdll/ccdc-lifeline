@@ -25,11 +25,11 @@ git clone https://github.com/rondotdll/ccdc-lifeline
 ```
 3. If you downloaded the zip, make sure to unzip the archive. Then cd into the root of the repo and compile:
 ```sh
-go build windows.go var.go lib.go -o "lifeline.exe"
+go generate ;; go build -o "lifeline.exe"
 ```
 4. Run "lifeline.exe" to begin initial setup
 
-### Linux (Debian / Ubuntu)
+### Linux
 #### From Releases:
 1. Head over to the [Releases](https://github.com/rondotdll/ccdc-lifeline/releases) page and download the latest linux release
 2. Unzip the release file
@@ -43,9 +43,16 @@ sudo ./setup
 ```
 
 #### Compiling from source:
-1. Install snap & git from apt
+1. Install snap & git from your package manager 
+
+**Ubuntu / Debian:**
 ```sh
 sudo apt update && sudo apt install snap git
+```
+
+**Fedora / CentOS:**
+```sh
+sudo pacman -Syy && sudo pacman -S snap git
 ```
 2. Download / Update go
 ```sh
@@ -64,24 +71,11 @@ cd ccdc-lifeline && go build linux.go var.go lib.go -o lifeline
 chmod +x lifeline && sudo lifeline
 ```
 
-### Linux (Fedora / CentOS)
-#### From Releases:
-1. Head over to the [Releases](https://github.com/rondotdll/ccdc-lifeline/releases) page and download the latest linux release
-2. Unzip the release file
-3. Make binaries executable
-```sh
-chmod +x activate && chmod +x setup
-```
-4. Run the initial setup wizard
-```sh
-./setup
-```
-
 
 ## How It Works
 The concept is pretty simple, it just waits for a file to be uploaded to github containing an encrypted string to reset all passwords on a device to. The most difficult task of this project was designing it in a way that even if it remains open-sourced, it would still be protective enough for our use case. During the setup process, we generate a config file ([GOB](https://go.dev/blog/gob)'d struct) that stores a link to the **GitHub repository\*** to check for an activation file at, and an RSA Private Key. The corresponding public key is then uploaded in a PEM string to [termbin.com](https://termbin.com/), which then returns a 4-5 letter code that can be easily written down for later use. **I know, this isn't very secure. __*DO NOT STORE RSA PUBLIC KEYS IN PUBLIC DATA REPOS!!!*__** Once the setup completes, the user (you) will be prompted to start the background daemon to begin periodically (every 5-sec) checking the GitHub repository for the Activate file.
-> \***For your convenience**, I have implemented numerous checks to verify your repository is configured correctly, and that you don't accidentally reuse an old repository already containing an `ACTIVATE` file.
-> (You're welcome)
+> **\*For your convenience**, I have implemented numerous checks to verify your repository is configured correctly, and that you don't accidentally reuse an old repository already containing an `ACTIVATE` file.
+> (you're welcome)
 
 Included with the actual protection binary, is also an activator binary which takes the code returned by termbin (referred to as a "recovery code") and a user-inputed password. After inputting both of these pieces of data, it pulls the RSA public key from termbin and uses it to encrypt the user-inputed password. This is what is actually stored in the outputed `ACTIVATE` file: the raw binary output of the RSA encryption.
 
