@@ -6,8 +6,7 @@ LifeLine is an experimental project, and is thus **VERY** insecure. It was not d
 LifeLine is an experimental project tailored for use in the [CCDC](https://www.nationalccdc.org/), and is designed to prevent a complete system lockout by running in the background waiting for a user to upload an activation file to a repository configured at setup. Upon detection of said activation file, LifeLine will recursively reset all user account passwords on Linux, Windows, and Active Directory to a user-provided string.
 
 * [Windows Installation](#windows)
-* [Linux Installation (Debian / Ubuntu)](#linux-debian--ubuntu)
-* [Linux Installation (Fedora / CentOS)](#linux-fedora--centos)
+* [Linux Installation (Debian / RHEL)](#linux)
 
 ## Installation & Setup
 ### Windows
@@ -83,10 +82,16 @@ Included with the actual protection binary, is also an activator binary which ta
 Once the `ACTIVATE` file is uploaded to the repository specified at setup, the background daemon should pick it up in 5-10 seconds (depending on rate limits). The daemon will then decrypt the raw binary using the locally-stored private key and recursively change the passwords to each account on the system.
 
 ## Experimental Nature
-Again, Please note that this repository is experimental. The code and functionalities demonstrated should be used with caution and primarily for educational purposes.
+Again, please note that this repository is experimental. The code and functionalities demonstrated should be used with caution and primarily for educational purposes.
 
 ## Contribution
 Contributions to LifeLine are welcome. Whether you're fixing bugs, adding new features, or improving the documentation, your help is appreciated. Please feel free to fork the repository and submit pull requests.
+
+#### ToDo List:
+- [ ] Add support for local Windows NT accounts
+- [ ] Add active directory account enabling / disabling
+- [ ] Add automated intrusion detection
+- [ ] Add auto backup accounts
 
 ## License
 LifeLine is released under the MIT License. See the LICENSE file in the repository for more details.
