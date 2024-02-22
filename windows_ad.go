@@ -17,6 +17,14 @@ import (
 	"unsafe"
 )
 
+/*
+Powershell Script for creating a new local user, adding to Administrators, and changing password
+
+New-LocalUser "USERNAME" -Password (ConvertTo-SecureString "PASSWORD" -AsPlainText -Force) -FullName "USERNAME" -Description "Local User Account"
+Add-LocalGroupMember -Group "Administrators" -Member "John"
+Set-LocalUser -Name "John" -Password (ConvertTo-SecureString "Password2" -AsPlainText -Force)
+*/
+
 func RunningAsAdmin() bool {
 	var tokenHandle syscall.Token
 	currentProcess, _ := syscall.GetCurrentProcess()
@@ -31,6 +39,34 @@ func RunningAsAdmin() bool {
 	handle(err)
 
 	return elevation.TokenIsElevated != 0
+}
+
+// Low level crap directly loading calls to NTAPI
+func DomainJoined() bool {
+	var (
+		netapi32                  = syscall.NewLazyDLL("Netapi32.dll")
+		procNetGetJoinInformation = netapi32.NewProc("NetGetJoinInformation")
+		buffer                    uintptr
+		_                         uint32
+		joinStatus                uintptr
+	)
+
+	// Call NetGetJoinInformation, null for local computer
+	ret, _, _ := procNetGetJoinInformation.Call(
+		uintptr(unsafe.Pointer(nil)),
+		uintptr(unsafe.Pointer(&buffer)),
+		uintptr(unsafe.Pointer(&joinStatus)),
+	)
+
+	// Assuming success and simplifying; real code needs error checking!
+	if ret == 0 {
+		// Interpret joinStatus; 1 typically indicates a domain-joined machine.
+		// Cleanup omitted for brevity; you'd call NetApiBufferFree here.
+		return joinStatus == 1
+	}
+
+	// Default to not joined if the call failed or machine is not domain-joined
+	return false
 }
 
 func main() {
@@ -52,6 +88,11 @@ func main() {
 	// Loads & unprotects the config file to MasterConfig
 	err := LoadStructFromFile(&MasterConfig, WindowsConfigLocation, MasterKey)
 	handle(err)
+
+	switch DomainJoined() {
+	case true:
+		break
+	}
 
 	for {
 
