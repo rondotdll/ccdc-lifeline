@@ -37,7 +37,7 @@ git clone https://github.com/rondotdll/ccdc-lifeline
 > **Domain Joined:**
 > ```sh
 > go generate ;; go build -tags "ad" -o lifeline.exe
-> ``
+> ```
 4. Run "lifeline.exe" to begin initial setup
 
 ### Linux
