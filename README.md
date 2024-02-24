@@ -29,12 +29,12 @@ go version
 git clone https://github.com/rondotdll/ccdc-lifeline
 ```
 3. If you downloaded the zip, make sure to unzip the archive. Then cd into the root of the repo and compile:
-> **Local Accounts:**
+> **Local Accounts:** (Server 2016)
 > ```sh
 > go generate ;; go build -o lifeline.exe
 > ```
 
-> **Domain Joined:**
+> **Domain Joined:** (Server 2019)
 > ```sh
 > go generate ;; go build -tags "ad" -o lifeline.exe
 > ```
