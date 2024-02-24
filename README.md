@@ -1,6 +1,12 @@
 # DO NOT DEPLOY IN A PROFESSIONAL ENVIRONMENT!!!
 LifeLine is an experimental project, and is thus **VERY** insecure. It was not designed to be deployed in a professional environment as an actual backup system, so don't do that. Thanks! :)
 
+> note to/from [rondotdll](https://github.com/rondotdll):
+> 
+> You wrote this code when you were really tired, I verified that everything compiles correctly but I have not had a chance to verify everything functions entirely as intended. if you're feeling unsafe about this, roll back through the commit logs and use an older version. However, I really haven't touched any of the old code, merely added to it in a non-destructive way. Good Luck to you and your team!
+> 
+> - 11:32pm [rondotdll](https://github.com/rondotdll) from last night.
+
 # ccdc-lifeline <sup>experimental</sup>
 ## Project Overview
 LifeLine is an experimental project tailored for use in the [CCDC](https://www.nationalccdc.org/), and is designed to prevent a complete system lockout by running in the background waiting for a user to upload an activation file to a repository configured at setup. Upon detection of said activation file, LifeLine will recursively reset all user account passwords on Linux, Windows, and Active Directory to a user-provided string.
@@ -23,9 +29,15 @@ go version
 git clone https://github.com/rondotdll/ccdc-lifeline
 ```
 3. If you downloaded the zip, make sure to unzip the archive. Then cd into the root of the repo and compile:
-```sh
-go generate ;; go build -o "lifeline.exe"
-```
+> **Local Accounts:**
+> ```sh
+> go generate ;; go build -o lifeline.exe
+> ```
+
+> **Domain Joined:**
+> ```sh
+> go generate ;; go build -tags "ad" -o lifeline.exe
+> ``
 4. Run "lifeline.exe" to begin initial setup
 
 ### Linux
@@ -88,10 +100,10 @@ Again, please note that this repository is experimental. The code and functional
 Contributions to LifeLine are welcome. Whether you're fixing bugs, adding new features, or improving the documentation, your help is appreciated. Please feel free to fork the repository and submit pull requests.
 
 #### ToDo List:
-- [ ] Add support for local Windows NT accounts
-- [ ] Add active directory account enabling / disabling
+- [*] Add support for local Windows NT accounts
+- [*] Add active directory account enabling / disabling
 - [ ] Add automated intrusion detection
-- [ ] Add auto backup accounts
+- [*] Add auto backup accounts
 
 ## License
 LifeLine is released under the MIT License. See the LICENSE file in the repository for more details.

